@@ -1,69 +1,40 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+      <section id="evaluate" className="bg-evaluate">
+        <div className="grid grid-cols-[1.25fr_1fr] items-center gap-10 max-w-7xl mx-auto px-10 py-20">
+          <div className="space-y-5">
+            <span className="inline-flex items-center gap-2 text-xs font-label bg-accent-light text-accent-dark px-3 py-1 rounded-full"><i className="ri-flashlight-line"></i>Screening in under 10 seconds</span>
+            <h1 className="font-heading text-6xl font-bold">Read a developer's GitHub <i className="text-primary">like an engineer would.</i></h1>
+            <p className="text-lg max-w-xl text-foreground-dark">Paste a candidate's username. GitScout reads their public repos and tells you how strong the evidence looks, how confident you should be, and what to ask in the interview.</p>
+            <form className="flex max-w-xl bg-report p-1.5 rounded-full border border-border">
+              <div className="flex-1 flex items-center gap-2 px-4">
+                <i className="ri-github-fill text-xl text-foreground-light"></i>
+                <input type="text" placeholder="username or github.com/username" className="w-full text-sm py-3" />
+              </div>
+              <button className="bg-primary text-report px-6 py-3 rounded-full text-sm font-semibold">Evaluate</button>
+            </form>
+          </div>
+          <div className="relative">
+            <img src="https://public.readdy.ai/ai/img_res/92882e8abd631a3437ce9d71816172f1.jpg" className="w-full h-[460px] object-cover rounded-3xl" />
+            <div className="absolute -left-8 bottom-10 bg-report p-4 shadow-xl rounded-2xl text-foreground-light">
+              <p className="font-label text-xs uppercase tracking-widest">Public code signal</p>
+              <p className="font-heading text-2xl font-bold text-primary mt-1 mb-2">Strong</p>
+              <div className="flex items-center gap-2 font-label text-xs">
+                <span>Confidence</span>
+                <div className="flex gap-1">
+                  <span className="h-1.5 w-4 rounded-full bg-primary"></span>
+                  <span className="h-1.5 w-4 rounded-full bg-primary"></span>
+                  <span className="h-1.5 w-4 rounded-full bg-primary"></span>
+                </div>
+                <span>High</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+      <section id="report" className="">Report</section>
+      <section id="how-it-works" className="">How it works</section>
+    </main>
   );
 }
