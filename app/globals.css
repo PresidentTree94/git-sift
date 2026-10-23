@@ -4,16 +4,28 @@
   --color-evaluate: oklch(.97 .012 85);
   --color-report: oklch(.99 .008 85);
   --color-accent-light: oklch(.95 .06 75);
+  --color-accent-mid: oklch(.55 .13 55);
   --color-accent-dark: oklch(.36 .08 55);
   --color-primary: oklch(.47 .115 155);
   --color-foreground-light: oklch(.52 .014 160);
   --color-foreground-dark: oklch(.37 .014 160);
   --color-border: oklch(.88 .02 85);
+  --color-dark: oklch(.16 .01 160);
   --font-body: var(--font-ibm-plex-sans);
   --font-label: var(--font-jetbrains-mono);
   --font-heading: var(--font-fraunces);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body);
+  color: var(--color-dark);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
 }

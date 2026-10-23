@@ -30,7 +30,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
-        <footer></footer>
+        <footer className="flex items-center justify-between gap-2 bg-report px-10 py-6">
+          <span className="font-heading font-bold">GitScout</span>
+          <p className="text-xs text-foreground-light">&copy; 2026 GitScout. Data from the public GitHub API.</p>
+        </footer>
       </body>
     </html>
   );
