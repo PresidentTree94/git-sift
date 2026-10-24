@@ -1,19 +1,33 @@
+const cards = [
+  { number: 0, text: "Stars earned" },
+  { number: 0, text: "Followers" },
+  { number: 0, text: "Original repos" },
+  { number: 0, text: "Years on GitHub" }
+];
+
+const checklist = [
+  { checked: false, text: "At least 4 original projects to inspect" },
+  { checked: false, text: "Public activity in the last 6 months" },
+  { checked: false, text: "Outside traction (50+ stars)" },
+  { checked: false, text: "Most projects have a description" }
+];
+
 const steps = [
   { icon: "ri-user-search-line", title: "Paste a username", text: "Grab it from the resume or LinkedIn. Full profile URLs work too." },
   { icon: "ri-bar-chart-box-line", title: "We read the public record", text: "Repos, stars, languages, recency, docs and licenses — pulled live from GitHub." },
   { icon: "ri-chat-check-line", title: "Get interview-ready notes", text: "A banded signal, a confidence level, and the evidence behind every line — click any finding to see it." }
 ];
 
-export default function Home() {
+export default async function Home() {
   return (
     <main>
-      <section id="evaluate" className="bg-evaluate px-10 py-20">
-        <div className="grid grid-cols-[1.25fr_1fr] items-center gap-10 max-w-7xl mx-auto">
+      <section id="evaluate" className="bg-evaluate">
+        <div className="grid grid-cols-[1.25fr_1fr] items-center gap-10">
           <div className="space-y-5">
-            <span className="inline-flex items-center gap-2 text-xs font-label bg-accent-light text-accent-dark px-3 py-1 rounded-full"><i className="ri-flashlight-line"></i>Screening in under 10 seconds</span>
+            <span className="inline-flex items-center gap-2 text-xs font-label bg-accent-light text-accent-dark px-3 py-1 rounded-full"><i className="ri-shield-check-line"></i>No candidate score. Just evidence.</span>
             <h1 className="text-6xl">Read a developer's GitHub <i className="text-primary">like an engineer would.</i></h1>
-            <p className="text-lg max-w-xl text-foreground-dark">Paste a candidate's username. GitScout reads their public repos and tells you how strong the evidence looks, how confident you should be, and what to ask in the interview.</p>
-            <form className="flex max-w-xl bg-report p-1.5 rounded-full border border-border mt-8">
+            <p className="text-lg max-w-xl text-foreground-dark">Paste a candidate's username. GitSift reads their public repos and gives you a banded signal, a confidence level, and the evidence behind every finding — plus an honest list of what it could not see.</p>
+            <form className="flex max-w-xl bg-report p-1.5 rounded-full border border-[oklch(.88_.02_85)] mt-8">
               <div className="flex-1 flex items-center gap-2 px-4">
                 <i className="ri-github-fill text-xl text-foreground-light"></i>
                 <input type="text" placeholder="username or github.com/username" className="w-full text-sm py-3 outline-none" />
@@ -39,37 +53,122 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section id="report" className="bg-report px-10 py-20">
-        <div className="max-w-7xl mx-auto">
+      <section id="report" className="bg-report">
+        <div>
           <p className="font-label text-xs uppercase tracking-widest text-accent-mid">Candidate report</p>
           <h2 className="text-4xl my-2">Username</h2>
           <p className="text-foreground-dark">Two questions, answered separately: how strong is the public evidence, and how much of it is there?</p>
           <article className="grid grid-cols-[340px_1fr] gap-6 mt-8">
             <aside className="bg-dark text-report p-7 rounded-3xl">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-4">
                 <img src="https://placehold.co/64" className="h-16 w-16 rounded-full" />
                 <div>
                   <p className="font-heading text-xl font-bold">Username</p>
-                  <a className="font-label text-xs">@username</a>
+                  <a className="font-label text-xs text-[oklch(.85_.14_75)]">@username</a>
                 </div>
               </div>
-              <p>Bio</p>
-              <div>GitHub sidebar</div>
-              <div>Signal</div>
-              <div>Cards</div>
-              <div>Languages</div>
+              <p className="text-sm text-[oklch(.84_.008_160)]">Bio goes here.</p>
+              <div className="mt-3 mb-6 text-xs space-y-1">
+                <p className="flex items-center gap-2 text-[oklch(.74_.01_160)]"><i className="ri-map-pin-line"></i>Location</p>
+                {/*Other details*/}
+                <p className="flex items-center gap-2 text-[oklch(.62_.012_160)]"><i className="ri-history-line"></i>Last public push</p>
+              </div>
+              <div className="rounded-2xl border-l-4 border-[oklch(.44_.014_160)] p-4 bg-[oklch(.22_.01_160)]">
+                <p className="font-label text-xs uppercase tracking-widest text-[oklch(.62_.012_160)]">Public code signal</p>
+                <p className="mt-1 mb-3 font-heading font-bold text-2xl text-[oklch(.74_.01_160)]">Signal</p>
+                <div className="flex items-center gap-2 font-label text-xs">
+                  <span className="text-[oklch(.62_.012_160)]">Confidence</span>
+                  <div className="flex gap-1">
+                    <span className="h-1.5 w-4 rounded-full bg-report"></span>
+                    <span className="h-1.5 w-4 rounded-full bg-[oklch(.37_.014_160)]"></span>
+                    <span className="h-1.5 w-4 rounded-full bg-[oklch(.37_.014_160)]"></span>
+                  </div>
+                  <span>Low</span>
+                </div>
+              </div>
+              <div className="mt-5 mb-6 grid grid-cols-2 gap-3">
+                {cards.map((c, index) => (
+                  <div key={index} className="bg-[oklch(.22_.01_160)] p-3 rounded-xl">
+                    <p className="font-heading text-xl font-bold">{c.number}</p>
+                    <p className="font-label text-xs text-[oklch(.62_.012_160)]">{c.text}</p>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="font-label text-xs text-[oklch(.62_.012_160)]">Languages in public repos</p>
+                <div className="flex h-2 w-full overflow-hidden rounded-full bg-[oklch(.29_.012_160)] mt-2 mb-3">
+                  <div className="bg-report w-1/2"></div>
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-report"></span>
+                    <span className="text-xs text-[oklch(.84_.008_160)]">Lang 50%</span>
+                  </div>
+                </div>
+              </div>
             </aside>
-            <div>
-              <div>Signal & confidence</div>
-              <div>What we actually found</div>
+            <div className="space-y-6">
+              <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">
+                <div className="flex items-center justify-between">
+                  <h3>Signal & confidence</h3>
+                  <p className="font-label text-xs text-[oklch(.52_.014_160)]">Banded read — not a score</p>
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-[oklch(.93_.016_85)] mt-5 mb-6">
+                  <div className="pr-6">
+                    <p className="font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]">Public code signal</p>
+                    <div className="flex flex-wrap gap-1.5 mt-3 text-xs font-label">
+                      <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Strong</span>
+                      <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Moderate</span>
+                      <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Thin</span>
+                      <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">No public data</span>
+                    </div>
+                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Enough public evidence to shortlist on. Read the projects below before the interview.</p>
+                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Real public evidence, but not enough to decide alone. Pair it with a code walkthrough or take-home.</p>
+                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Very little public code. This is not a bad score — ask for a private repo, portfolio, or take-home instead.</p>
+                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">No public repositories, so no conclusion is drawn. Ask for work samples rather than reading anything into it.</p>
+                  </div>
+                  <div className="pl-6">
+                    <p className="font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]">How sure are we</p>
+                    <div className="flex items-center gap-3">
+                      <span className="font-heading text-2xl font-bold my-2">Low</span>
+                      <div className="flex gap-1">
+                        <span className="h-2 w-6 rounded-full bg-[oklch(.29_.012_160)]"></span>
+                        <span className="h-2 w-6 rounded-full bg-[oklch(.88_.02_85)]"></span>
+                        <span className="h-2 w-6 rounded-full bg-[oklch(.88_.02_85)]"></span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-[oklch(.44_.014_160)]">Enough evidence to trust this read on their public work — which is still only public work.</p>
+                    <p className="text-xs text-[oklch(.44_.014_160)]">Some evidence present, but with gaps. Treat the notes as a starting point, not an assessment.</p>
+                    <p className="text-xs text-[oklch(.44_.014_160)]">Too little public evidence to say much. The notes below are prompts for a conversation, not conclusions.</p>
+                    <ul className="text-xs mt-3 space-y-1">
+                      {checklist.map((c, index) => (
+                        <li key={index} className="text-[oklch(.62_.012_160)] flex items-center gap-2">
+                          <i className="ri-checkbox-blank-circle-line"></i>
+                          <span>{c.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-report border border-[oklch(.93_.016_85)] p-4">
+                  <p className="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]"><i className="ri-eye-off-line"></i>What this report cannot see</p>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-2 text-xs text-[oklch(.37_.014_160)]">
+                    <p>Private and company code — most senior engineers keep their best work behind a firewall.</p>
+                    <p>Work tracked outside GitHub: GitLab, Bitbucket, Gerrit, internal monorepos.</p>
+                    <p>Non-code contributions: reviews, design docs, mentoring, on-call.</p>
+                    <p>Commit activity inside forked repositories.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">What we actually found</div>
               <div>Positive signals/Worth asking about</div>
               <div>Pinned repos</div>
             </div>
           </article>
         </div>
       </section>
-      <section id="how-it-works" className="bg-[oklch(.4_.1_155)] px-10 py-20">
-        <div className="max-w-7xl mx-auto">
+      <section id="how-it-works" className="bg-[oklch(.4_.1_155)]">
+        <div>
           <h2 className="text-4xl max-w-xl text-report">No engineering degree required to screen engineers.</h2>
           <div className="grid grid-cols-3 gap-6 mt-10 mb-8">
             {steps.map((s, index) => (
@@ -78,7 +177,7 @@ export default function Home() {
                   <div className="bg-[oklch(.8_.16_70)] h-12 w-12 rounded-xl flex items-center justify-center text-2xl"><i className={s.icon}></i></div>
                   <span className="font-label text-sm text-[oklch(.77_.11_155)]">0{index + 1}</span>
                 </div>
-                <h3 className="text-report text-xl mt-5 mb-2">{s.title}</h3>
+                <h3 className="text-report mt-5 mb-2">{s.title}</h3>
                 <p className="text-sm text-[oklch(.93_.045_155)]">{s.text}</p>
               </div>
             ))}

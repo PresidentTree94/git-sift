@@ -20,7 +20,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "GitScout",
+  title: "GitSift",
   description: "Evaluate GitHub repositories with ease and efficiency.",
 };
 
@@ -30,9 +30,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
-        <footer className="flex items-center justify-between gap-2 bg-report px-10 py-6">
-          <span className="font-heading font-bold">GitScout</span>
-          <p className="text-xs text-foreground-light">&copy; 2026 GitScout. Data from the public GitHub API.</p>
+        <footer className="flex items-center justify-between gap-2 bg-report px-10 py-6 text-xs text-foreground-light">
+          <div className="flex items-center gap-3">
+            <span className="font-heading font-bold text-base text-dark">GitSift</span>
+            <p>Evidence-first GitHub evaluation — never a candidate score.</p>
+          </div>
+          <p>&copy; 2026 GitSift. Data from the public GitHub API.</p>
         </footer>
       </body>
     </html>

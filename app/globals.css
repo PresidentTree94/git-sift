@@ -9,7 +9,6 @@
   --color-primary: oklch(.47 .115 155);
   --color-foreground-light: oklch(.52 .014 160);
   --color-foreground-dark: oklch(.37 .014 160);
-  --color-border: oklch(.88 .02 85);
   --color-dark: oklch(.16 .01 160);
   --font-body: var(--font-ibm-plex-sans);
   --font-label: var(--font-jetbrains-mono);
@@ -25,7 +24,19 @@ body {
   color: var(--color-dark);
 }
 
+section {
+  @apply px-10 py-20;
+}
+
+section > div {
+  @apply max-w-7xl mx-auto;
+}
+
 h1, h2, h3 {
   font-family: var(--font-heading);
   font-weight: 700;
+}
+
+h3 {
+  @apply text-xl;
 }
