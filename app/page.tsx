@@ -1,16 +1,4 @@
-const cards = [
-  { number: 0, text: "Stars earned" },
-  { number: 0, text: "Followers" },
-  { number: 0, text: "Original repos" },
-  { number: 0, text: "Years on GitHub" }
-];
-
-const checklist = [
-  { checked: false, text: "At least 4 original projects to inspect" },
-  { checked: false, text: "Public activity in the last 6 months" },
-  { checked: false, text: "Outside traction (50+ stars)" },
-  { checked: false, text: "Most projects have a description" }
-];
+import Checklist from "@/components/Checklist";
 
 const steps = [
   { icon: "ri-user-search-line", title: "Paste a username", text: "Grab it from the resume or LinkedIn. Full profile URLs work too." },
@@ -19,6 +7,66 @@ const steps = [
 ];
 
 export default async function Home() {
+
+  const cards = [
+    { number: 0, text: "Stars earned" },
+    { number: 0, text: "Followers" },
+    { number: 0, text: "Something" },
+    { number: 0, text: "Something" }
+  ];
+
+  const signalChecklist = [
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" }
+  ]
+
+  const confidenceChecklist = [
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" },
+    { checked: false, title: "Something", context: "Some context" }
+  ];
+
+  let signal, signalDescription, confidence, confidenceDescription;
+
+  switch (signalChecklist.filter(item => item.checked).length) {
+    case 4:
+      signal = "Strong";
+      signalDescription = "Depth, more than one project, documentation and recent activity all agree. Still read the projects below before the interview.";
+      break;
+    case 3:
+      signal = "Moderate";
+      signalDescription = "Real public evidence, but not a pattern yet. Pair it with a code walkthrough or take-home — and read the missing check below before deciding.";
+      break;
+    case 2:
+    case 1:
+      signal = "Thin";
+      signalDescription = "Very little public code. That is normal early in a career and normal for engineers whose work sits behind a firewall. Ask for a private repo, portfolio, or take-home.";
+      break;
+    default:
+      signal = "No public data";
+      signalDescription = "No public repositories, so no conclusion is drawn. Ask for work samples rather than reading anything into it."
+      break;
+  }
+
+  const confidenceLength = confidenceChecklist.filter(item => item.checked).length;
+  switch (confidenceLength) {
+    case 4:
+      confidence = "High";
+      confidenceDescription = "Enough public record — in size, span and staying power — that the band rests on a real sample rather than one lucky repo.";
+      break;
+    case 3:
+      confidence = "Medium";
+      confidenceDescription = "A real but narrow record. The band is readable, though it comes from a small sample."
+      break;
+    default:
+      confidence = "Low";
+      confidenceDescription = "Very little public record to sample. Whatever the band says, it rests on almost nothing."
+      break;
+  }
+
   return (
     <main>
       <section id="evaluate" className="bg-evaluate">
@@ -59,7 +107,7 @@ export default async function Home() {
           <h2 className="text-4xl my-2">Username</h2>
           <p className="text-foreground-dark">Two questions, answered separately: how strong is the public evidence, and how much of it is there?</p>
           <article className="grid grid-cols-[340px_1fr] gap-6 mt-8">
-            <aside className="bg-dark text-report p-7 rounded-3xl">
+            <aside className="bg-dark text-report p-7 rounded-3xl sticky top-24 h-fit">
               <div className="flex items-center gap-4 mb-4">
                 <img src="https://placehold.co/64" className="h-16 w-16 rounded-full" />
                 <div>
@@ -75,15 +123,15 @@ export default async function Home() {
               </div>
               <div className="rounded-2xl border-l-4 border-[oklch(.44_.014_160)] p-4 bg-[oklch(.22_.01_160)]">
                 <p className="font-label text-xs uppercase tracking-widest text-[oklch(.62_.012_160)]">Public code signal</p>
-                <p className="mt-1 mb-3 font-heading font-bold text-2xl text-[oklch(.74_.01_160)]">Signal</p>
+                <p className="mt-1 mb-3 font-heading font-bold text-2xl text-[oklch(.74_.01_160)]">{signal}</p>
                 <div className="flex items-center gap-2 font-label text-xs">
                   <span className="text-[oklch(.62_.012_160)]">Confidence</span>
                   <div className="flex gap-1">
                     <span className="h-1.5 w-4 rounded-full bg-report"></span>
-                    <span className="h-1.5 w-4 rounded-full bg-[oklch(.37_.014_160)]"></span>
-                    <span className="h-1.5 w-4 rounded-full bg-[oklch(.37_.014_160)]"></span>
+                    <span className={`h-1.5 w-4 rounded-full ${confidenceLength > 2 ? "bg-report" : "bg-[oklch(.37_.014_160)]"}`}></span>
+                    <span className={`h-1.5 w-4 rounded-full ${confidenceLength === 4 ? "bg-report" : "bg-[oklch(.37_.014_160)]"}`}></span>
                   </div>
-                  <span>Low</span>
+                  <span>{confidence}</span>
                 </div>
               </div>
               <div className="mt-5 mb-6 grid grid-cols-2 gap-3">
@@ -110,45 +158,36 @@ export default async function Home() {
             <div className="space-y-6">
               <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">
                 <div className="flex items-center justify-between">
-                  <h3>Signal & confidence</h3>
+                  <h3 className="text-xl">Signal & confidence</h3>
                   <p className="font-label text-xs text-[oklch(.52_.014_160)]">Banded read — not a score</p>
                 </div>
                 <div className="grid grid-cols-2 divide-x divide-[oklch(.93_.016_85)] mt-5 mb-6">
-                  <div className="pr-6">
-                    <p className="font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]">Public code signal</p>
-                    <div className="flex flex-wrap gap-1.5 mt-3 text-xs font-label">
+                  <Checklist
+                    className="pr-6"
+                    heading="How good is the work"
+                    top={<div className="flex flex-wrap gap-1.5 my-3 text-xs font-label">
                       <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Strong</span>
                       <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Moderate</span>
                       <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Thin</span>
                       <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">No public data</span>
-                    </div>
-                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Enough public evidence to shortlist on. Read the projects below before the interview.</p>
-                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Real public evidence, but not enough to decide alone. Pair it with a code walkthrough or take-home.</p>
-                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">Very little public code. This is not a bad score — ask for a private repo, portfolio, or take-home instead.</p>
-                    <p className="text-sm text-[oklch(.29_.012_160)] mt-3">No public repositories, so no conclusion is drawn. Ask for work samples rather than reading anything into it.</p>
-                  </div>
-                  <div className="pl-6">
-                    <p className="font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]">How sure are we</p>
-                    <div className="flex items-center gap-3">
-                      <span className="font-heading text-2xl font-bold my-2">Low</span>
+                    </div>}
+                    description={signalDescription}
+                    list={signalChecklist}
+                  />
+                  <Checklist
+                    className="pl-6"
+                    heading="How sure we are"
+                    top={<div className="flex items-center gap-3">
+                      <span className="font-heading text-2xl font-bold my-2">{confidence}</span>
                       <div className="flex gap-1">
                         <span className="h-2 w-6 rounded-full bg-[oklch(.29_.012_160)]"></span>
-                        <span className="h-2 w-6 rounded-full bg-[oklch(.88_.02_85)]"></span>
-                        <span className="h-2 w-6 rounded-full bg-[oklch(.88_.02_85)]"></span>
+                        <span className={`h-2 w-6 rounded-full ${confidenceLength > 2 ? "bg-[oklch(.29_.012_160)]" : "bg-[oklch(.88_.02_85)]"}`}></span>
+                        <span className={`h-2 w-6 rounded-full ${confidenceLength === 4 ? "bg-[oklch(.29_.012_160)]" : "bg-[oklch(.88_.02_85)]"}`}></span>
                       </div>
-                    </div>
-                    <p className="text-xs text-[oklch(.44_.014_160)]">Enough evidence to trust this read on their public work — which is still only public work.</p>
-                    <p className="text-xs text-[oklch(.44_.014_160)]">Some evidence present, but with gaps. Treat the notes as a starting point, not an assessment.</p>
-                    <p className="text-xs text-[oklch(.44_.014_160)]">Too little public evidence to say much. The notes below are prompts for a conversation, not conclusions.</p>
-                    <ul className="text-xs mt-3 space-y-1">
-                      {checklist.map((c, index) => (
-                        <li key={index} className="text-[oklch(.62_.012_160)] flex items-center gap-2">
-                          <i className="ri-checkbox-blank-circle-line"></i>
-                          <span>{c.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                    </div>}
+                    description={confidenceDescription}
+                    list={confidenceChecklist}
+                  />
                 </div>
                 <div className="rounded-2xl bg-report border border-[oklch(.93_.016_85)] p-4">
                   <p className="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]"><i className="ri-eye-off-line"></i>What this report cannot see</p>
@@ -160,9 +199,55 @@ export default async function Home() {
                   </div>
                 </div>
               </div>
-              <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">What we actually found</div>
-              <div>Positive signals/Worth asking about</div>
-              <div>Pinned repos</div>
+              <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl">What we actually found</h3>
+                  <p className="font-label text-xs text-[oklch(.52_.014_160)]">Open any line to see the evidence</p>
+                </div>
+                <article className="flex flex-col divide-y divide-[oklch(.925_.016_85)] mt-4">
+                  <div>Recent public activity</div>
+                  <div>Reach of the work</div>
+                  <div>How they present projects</div>
+                  <div>Work in other people's code</div>
+                  <div>What they reach for</div>
+                </article>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-3xl p-6 border bg-[oklch(.97_.02_155)] border-[oklch(.93_.045_155)]">
+                  <h3 className="flex items-center gap-2 text-lg text-[oklch(.33_.08_155)]">
+                    <i className="ri-checkbox-circle-line"></i>
+                    Positive signals
+                  </h3>
+                  <ul></ul>
+                </div>
+                <div className="rounded-3xl p-6 border bg-[oklch(.97_.01_25)] border-[oklch(.93_.03_25)]">
+                  <h3 className="flex items-center gap-2 text-lg text-[oklch(.36_.1_25)]">
+                    <i className="ri-question-line"></i>
+                    Worth asking about
+                  </h3>
+                  <p className="text-xs text-[oklch(.52_.014_160)] mt-1">Questions for the interview — not disqualifiers.</p>
+                  <ul></ul>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl">Notable repositories</h3>
+                <p className="font-label text-xs text-[oklch(.52_.014_160)] mt-1 mb-4">Pinned projects are displayed first, followed by those that are popular or well-maintained.</p>
+                <article className="grid grid-cols-2 gap-4">
+                  <a className="bg-[oklch(.97_.012_85)] rounded-2xl border border-[oklch(.93_.016_85)] p-5">
+                    <h4 className="font-label text-sm font-semibold text-[oklch(.4_.1_155)]">project-title</h4>
+                    <p className="mt-2 mb-4 text-sm line-clamp-2 text-[oklch(.44_.014_160)]">Project description</p>
+                    <div className="flex items-center gap-4 font-label text-xs text-[oklch(.52_.014_160)]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-[oklch(.74_.16_65)]"></span>
+                        <span>Language</span>
+                      </div>
+                      <span className="flex items-center gap-1"><i className="ri-star-line"></i>0</span>
+                      <span className="flex items-center gap-1"><i className="ri-git-fork-line"></i>0</span>
+                      <span>Updated Mon Year</span>
+                    </div>
+                  </a>
+                </article>
+              </div>
             </div>
           </article>
         </div>

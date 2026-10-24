@@ -36,7 +36,3 @@ h1, h2, h3 {
   font-family: var(--font-heading);
   font-weight: 700;
 }
-
-h3 {
-  @apply text-xl;
-}
