@@ -9,10 +9,13 @@ export type ReportData = {
     id: string;
     title: string;
     description: string;
+    topics: string[];
     languages: Record<string, number>;
+    hasReadMe: boolean;
     stars: number;
     forks: number;
     pushed: string;
   }[];
   followers: number;
+  years: number;
 }

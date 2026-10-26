@@ -9,33 +9,35 @@ function convertPush(push: string) {
 
 export default function Report({ report }: { report: ReportData; }) {
 
-  const latestPush = convertPush(report.repos[0]?.pushed);
-  const stars = report.repos.reduce((sum: any, repo: any) => sum + repo.stars, 0);
+  const { name, username, avatar, url, bio, location, repos, followers, years } = report;
+
+  const latestPush = convertPush(repos[0]?.pushed);
+  const stars = repos.reduce((sum: any, repo: any) => sum + repo.stars, 0);
   const cumulativeLanguages: Record<string, number> = {};
-  for (const repo of report.repos) {
+  for (const repo of repos) {
     for (const [language, bytes] of Object.entries(repo.languages)) {
       cumulativeLanguages[language] = (cumulativeLanguages[language] || 0) + Number(bytes);
     }
   }
   const totalBytes = Object.values(cumulativeLanguages).reduce((sum, bytes) => sum + bytes, 0);
-  const percentages = Object.entries(cumulativeLanguages).map(([language, bytes]) => ({ language, percentage: Math.round((bytes / totalBytes) * 100) })).sort((a, b) => b.percentage - a.percentage);
+  const percentages = Object.entries(cumulativeLanguages).map(([language, bytes]) => ({ language, percentage: Math.round((bytes / totalBytes) * 100) })).filter(p => p.percentage !== 0).sort((a, b) => b.percentage - a.percentage);
 
   const cards = [
     { number: stars, text: "Stars" },
-    { number: report.followers, text: "Followers" },
-    { number: 0, text: "Something" },
-    { number: 0, text: "Something" }
+    { number: followers, text: "Followers" },
+    { number: repos.length, text: "Repos" },
+    { number: years, text: "Years" }
   ];
 
   const signalChecklist = [
-    { checked: false, title: "Project Documentation", context: "Most projects include descriptions, READMEs, topics, etc." },
+    { checked: repos.filter(r => r.description && r.topics && r.hasReadMe).length / repos.length >= 0.75, title: "Project Documentation", context: "Most projects include descriptions, READMEs, topics, etc." },
     { checked: false, title: "Something", context: "Some context" },
     { checked: false, title: "Something", context: "Some context" },
     { checked: false, title: "Something", context: "Some context" }
   ]
 
   const confidenceChecklist = [
-    { checked: report.repos.length >= 4, title: "Project Volume", context: "At least 4 public repositories" },
+    { checked: repos.length >= 4, title: "Project Volume", context: "At least 4 public repositories" },
     { checked: false, title: "Something", context: "Some context" },
     { checked: false, title: "Something", context: "Some context" },
     { checked: false, title: "Something", context: "Some context" }
@@ -83,20 +85,20 @@ export default function Report({ report }: { report: ReportData; }) {
     <section id="report" className="bg-report">
       <div>
         <p className="font-label text-xs uppercase tracking-widest text-accent-mid">Candidate report</p>
-        <h2 className="text-4xl my-2">{report.name}</h2>
+        <h2 className="text-4xl my-2">{name}</h2>
         <p className="text-foreground-dark">Two questions, answered separately: how strong is the public evidence, and how much of it is there?</p>
         <article className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 mt-8">
           <aside className="bg-dark text-report p-7 rounded-3xl lg:sticky top-24 h-fit">
             <div className="flex items-center gap-4 mb-4">
-              <img src={report.avatar} className="h-16 w-16 rounded-full" />
+              <img src={avatar} className="h-16 w-16 rounded-full" />
               <div>
-                <p className="font-heading text-xl font-bold">{report.name}</p>
-                <a href={report.url} target="_blank" rel="noopener noreferrer" className="font-label text-xs text-[oklch(.85_.14_75)]">@{report.username}</a>
+                <p className="font-heading text-xl font-bold">{name}</p>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="font-label text-xs text-[oklch(.85_.14_75)] hover:underline">@{username}</a>
               </div>
             </div>
-            <p className="text-sm text-[oklch(.84_.008_160)]">{report.bio}</p>
+            <p className="text-sm text-[oklch(.84_.008_160)]">{bio}</p>
             <div className="mt-3 mb-6 text-xs space-y-1">
-              <p className="flex items-center gap-2 text-[oklch(.74_.01_160)]"><i className="ri-map-pin-line"></i>{report.location}</p>
+              <p className="flex items-center gap-2 text-[oklch(.74_.01_160)]"><i className="ri-map-pin-line"></i>{location}</p>
               {/*Other details*/}
               <p className="flex items-center gap-2 text-[oklch(.62_.012_160)]"><i className="ri-history-line"></i>Last public push {latestPush}</p>
             </div>
@@ -215,8 +217,8 @@ export default function Report({ report }: { report: ReportData; }) {
             <div>
               <h3 className="text-xl">Notable repositories</h3>
               <p className="font-label text-xs text-[oklch(.52_.014_160)] mt-1 mb-4">Pinned projects are displayed first, followed by those that are popular or well-maintained.</p>
-              <article className="grid gri-cols-1 @2xl:grid-cols-2 gap-4">
-                {report.repos.slice(0, 6).map(r => (
+              <article className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
+                {repos.slice(0, 6).map(r => (
                   <a key={r.id} className="bg-[oklch(.97_.012_85)] rounded-2xl border border-[oklch(.93_.016_85)] p-5 flex flex-col">
                     <h4 className="font-label text-sm font-semibold text-[oklch(.4_.1_155)]">{r.title}</h4>
                     <p className="mt-2 mb-4 text-sm line-clamp-2 text-[oklch(.44_.014_160)] flex-1">{r.description}</p>
