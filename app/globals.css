@@ -25,7 +25,7 @@ body {
 }
 
 section {
-  @apply px-10 py-20;
+  @apply px-10 py-15 lg:py-20;
 }
 
 section > div {
