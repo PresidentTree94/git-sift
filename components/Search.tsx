@@ -13,12 +13,12 @@ export default function Search({ setReport }: { setReport: React.Dispatch<React.
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex lg:max-w-xl bg-report p-1.5 rounded-full border border-[oklch(.88_.02_85)] mt-8">
+    <form onSubmit={handleSubmit} className="flex lg:max-w-xl bg-background-50 p-1.5 rounded-full border border-background-200 mt-8">
       <div className="flex-1 flex items-center gap-2 px-4">
-        <i className="ri-github-fill text-xl text-foreground-light"></i>
+        <i className="ri-github-fill text-xl text-foreground-500"></i>
         <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username or https://github.com/username" className="w-full text-sm py-3 outline-none" />
       </div>
-      <button className="bg-primary text-report px-6 py-3 rounded-full text-sm font-semibold">Evaluate</button>
+      <button className="bg-primary-600 text-background-50 px-6 py-3 rounded-full text-sm font-semibold">Evaluate</button>
     </form>
   );
 }

@@ -31,3 +31,8 @@ export async function getRepoReadMe(username: string, repo: string) {
   const res = await fetch(`https://api.github.com/repos/${username}/${repo}/readme`, { headers, next: { revalidate: 3600 } });
   return res.ok;
 }
+
+export async function getRepoCommits(username: string, repo: string) {
+  const res = await fetch(`https://api.github.com/repos/${username}/${repo}/commits`, { headers, next: { revalidate: 3600 } });
+  return res.json();
+}

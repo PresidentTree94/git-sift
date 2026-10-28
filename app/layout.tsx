@@ -30,9 +30,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
-        <footer className="flex items-center justify-between gap-2 bg-report px-10 py-6 text-xs text-foreground-light">
+        <footer className="flex items-center justify-between gap-2 bg-background-50 px-10 py-6 text-xs text-foreground-500">
           <div className="flex items-center gap-3">
-            <span className="font-heading font-bold text-base text-dark">GitSift</span>
+            <span className="font-heading font-bold text-base text-foreground-950">GitSift</span>
             <p>Evidence-first GitHub evaluation — never a candidate score.</p>
           </div>
           <p>&copy; 2026 GitSift. Data from the public GitHub API.</p>

@@ -14,8 +14,16 @@ export type ReportData = {
     hasReadMe: boolean;
     stars: number;
     forks: number;
+    commits: {
+      commit: {
+        author: {
+          name: string;
+          date: string;
+        }
+      }
+    }[];
     pushed: string;
   }[];
   followers: number;
-  years: number;
+  months: number;
 }

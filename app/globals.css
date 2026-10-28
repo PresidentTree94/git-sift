@@ -1,15 +1,33 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-evaluate: oklch(.97 .012 85);
-  --color-report: oklch(.99 .008 85);
-  --color-accent-light: oklch(.95 .06 75);
-  --color-accent-mid: oklch(.55 .13 55);
-  --color-accent-dark: oklch(.36 .08 55);
-  --color-primary: oklch(.47 .115 155);
-  --color-foreground-light: oklch(.52 .014 160);
-  --color-foreground-dark: oklch(.37 .014 160);
-  --color-dark: oklch(.16 .01 160);
+  --color-background-50: oklch(.99 .008 85);
+  --color-background-100: oklch(.97 .012 85);
+  --color-background-200: oklch(.93 .016 85);
+  --color-primary-50: oklch(.97 .02 155);
+  --color-primary-100: oklch(.93 .045 155);
+  --color-primary-300: oklch(.77 .11 155);
+  --color-primary-400: oklch(.66 .13 155);
+  --color-primary-600: oklch(.47 .115 155);
+  --color-primary-700: oklch(.4 .1 155);
+  --color-primary-800: oklch(.33 .08 155);
+  --color-accent-100: oklch(.95 .06 75);
+  --color-accent-200: oklch(.9 .1 75);
+  --color-accent-400: oklch(.8 .16 70);
+  --color-accent-700: oklch(.55 .13 55);
+  --color-secondary-50: oklch(.97 .01 25);
+  --color-secondary-100: oklch(.93 .03 25);
+  --color-secondary-400: oklch(.68 .14 25);
+  --color-secondary-800: oklch(.36 .1 25);
+  --color-foreground-200: oklch(.84 .008 160);
+  --color-foreground-300: oklch(.74 .01 160);
+  --color-foreground-400: oklch(.62 .012 160);
+  --color-foreground-500: oklch(.52 .014 160);
+  --color-foreground-600: oklch(.44 .014 160);
+  --color-foreground-700: oklch(.37 .014 160);
+  --color-foreground-800: oklch(.29 .012 160);
+  --color-foreground-900: oklch(.22 .01 160);
+  --color-foreground-950: oklch(.16 .01 160);
   --font-body: var(--font-ibm-plex-sans);
   --font-label: var(--font-jetbrains-mono);
   --font-heading: var(--font-fraunces);
@@ -21,7 +39,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  color: var(--color-dark);
+  color: var(--color-foreground-950);
 }
 
 section {

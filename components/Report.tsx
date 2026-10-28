@@ -1,7 +1,9 @@
 import Checklist from "./Checklist";
 import { ReportData } from "@/types/ReportData";
+import { SIGNAL_DATA } from "@/utils/signalData";
+import { CONFIDENCE_DATA } from "@/utils/confidenceData";
 
-const LANG_COLORS = ["bg-[oklch(.66_.13_155)]", "bg-[oklch(.8_.16_70)]", "bg-[oklch(.68_.14_25)]", "bg-[oklch(.86_.08_155)]", "bg-[oklch(.9_.1_75)]", "bg-[oklch(.86_.06_25)]"];
+const LANG_COLORS = ["bg-primary-400", "bg-accent-400", "bg-secondary-400", "bg-[oklch(.86_.08_155)]", "bg-accent-200", "bg-[oklch(.86_.06_25)]"];
 
 function convertPush(push: string) {
   return new Date(push).toLocaleDateString("en-US", { month: "short", year: "numeric" });
@@ -9,7 +11,7 @@ function convertPush(push: string) {
 
 export default function Report({ report }: { report: ReportData; }) {
 
-  const { name, username, avatar, url, bio, location, repos, followers, years } = report;
+  const { name, username, avatar, url, bio, location, repos, followers, months } = report;
 
   const latestPush = convertPush(repos[0]?.pushed);
   const stars = repos.reduce((sum: any, repo: any) => sum + repo.stars, 0);
@@ -26,135 +28,110 @@ export default function Report({ report }: { report: ReportData; }) {
     { number: stars, text: "Stars" },
     { number: followers, text: "Followers" },
     { number: repos.length, text: "Repos" },
-    { number: years, text: "Years" }
+    { number: Math.ceil(months / 12), text: "Years" }
   ];
 
   const signalChecklist = [
-    { checked: repos.filter(r => r.description && r.topics && r.hasReadMe).length / repos.length >= 0.75, title: "Project Documentation", context: "Most projects include descriptions, READMEs, topics, etc." },
-    { checked: false, title: "Something", context: "Some context" },
-    { checked: false, title: "Something", context: "Some context" },
-    { checked: false, title: "Something", context: "Some context" }
+    { checked: repos.filter(r => r.description && r.topics && r.hasReadMe).length / repos.length >= 0.75, title: "Project Standards", context: "Most projects include descriptions, READMEs, topics, etc." },
+    { checked: repos.filter(r => r.commits.length >= 7).length / repos.length >= 0.75, title: "Project Substance", context: "Most projects have at least 7 commits" },
+    { checked: repos.filter(r => r.commits.filter(c => c.commit.author.name === username).length / r.commits.length >= 0.75).length >= 0.75, title: "Repo Ownership", context: "Most projects are owned and maintained by the user" },
+    { checked: repos.filter(r => Object.keys(r.languages).length >= 3).length / repos.length >= 0.75, title: "Technical Breadth", context: "Most projects use at least 3 languages" }
   ]
+
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+  const allCommitDates: Record<string, number> = {};
+  for (const repo of repos) {
+    for (const com of repo.commits.filter(c => c.commit.author.name === username)) {
+      const date = convertPush(com.commit.author.date);
+      allCommitDates[date] = (allCommitDates[date] || 0) + 1;
+    }
+  }
 
   const confidenceChecklist = [
     { checked: repos.length >= 4, title: "Project Volume", context: "At least 4 public repositories" },
-    { checked: false, title: "Something", context: "Some context" },
-    { checked: false, title: "Something", context: "Some context" },
+    { checked: repos.filter(r => new Date(r.pushed) > oneYearAgo).length > 0, title: "Activity Recency", context: "Repo updates within the last year" },
+    { checked: Object.keys(allCommitDates).length / months >= 0.5, title: "Activity Coverage", context: "Commits are pushed regularly since account creation" },
     { checked: false, title: "Something", context: "Some context" }
   ];
 
-  let signal, signalDescription, confidence, confidenceDescription;
-
-  switch (signalChecklist.filter(item => item.checked).length) {
-    case 4:
-      signal = "Strong";
-      signalDescription = "Depth, more than one project, documentation and recent activity all agree. Still read the projects below before the interview.";
-      break;
-    case 3:
-      signal = "Moderate";
-      signalDescription = "Real public evidence, but not a pattern yet. Pair it with a code walkthrough or take-home — and read the missing check below before deciding.";
-      break;
-    case 2:
-    case 1:
-      signal = "Thin";
-      signalDescription = "Very little public code. That is normal early in a career and normal for engineers whose work sits behind a firewall. Ask for a private repo, portfolio, or take-home.";
-      break;
-    default:
-      signal = "No public data";
-      signalDescription = "No public repositories, so no conclusion is drawn. Ask for work samples rather than reading anything into it."
-      break;
-  }
-
-  const confidenceLength = confidenceChecklist.filter(item => item.checked).length;
-  switch (confidenceLength) {
-    case 4:
-      confidence = "High";
-      confidenceDescription = "Enough public record — in size, span and staying power — that the band rests on a real sample rather than one lucky repo.";
-      break;
-    case 3:
-      confidence = "Medium";
-      confidenceDescription = "A real but narrow record. The band is readable, though it comes from a small sample."
-      break;
-    default:
-      confidence = "Low";
-      confidenceDescription = "Very little public record to sample. Whatever the band says, it rests on almost nothing."
-      break;
-  }
+  const { signal, signalDescription, signalColor, signalBorder, pill } = SIGNAL_DATA[signalChecklist.filter(item => item.checked).length];
+  const { confidence, confidenceDescription, pills } = CONFIDENCE_DATA[confidenceChecklist.filter(item => item.checked).length];
 
   return (
-    <section id="report" className="bg-report">
+    <section id="report" className="bg-background-50">
       <div>
-        <p className="font-label text-xs uppercase tracking-widest text-accent-mid">Candidate report</p>
+        <p className="font-label text-xs uppercase tracking-widest text-accent-700">Candidate report</p>
         <h2 className="text-4xl my-2">{name}</h2>
-        <p className="text-foreground-dark">Two questions, answered separately: how strong is the public evidence, and how much of it is there?</p>
+        <p className="text-foreground-700">Two questions, answered separately: how strong is the public evidence, and how much of it is there?</p>
         <article className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 mt-8">
-          <aside className="bg-dark text-report p-7 rounded-3xl lg:sticky top-24 h-fit">
+          <aside className="bg-foreground-950 text-background-50 p-7 rounded-3xl lg:sticky top-24 h-fit">
             <div className="flex items-center gap-4 mb-4">
               <img src={avatar} className="h-16 w-16 rounded-full" />
               <div>
                 <p className="font-heading text-xl font-bold">{name}</p>
-                <a href={url} target="_blank" rel="noopener noreferrer" className="font-label text-xs text-[oklch(.85_.14_75)] hover:underline">@{username}</a>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="font-label text-xs text-accent-400 hover:underline">@{username}</a>
               </div>
             </div>
-            <p className="text-sm text-[oklch(.84_.008_160)]">{bio}</p>
-            <div className="mt-3 mb-6 text-xs space-y-1">
-              <p className="flex items-center gap-2 text-[oklch(.74_.01_160)]"><i className="ri-map-pin-line"></i>{location}</p>
+            <p className="text-sm text-foreground-200">{bio}</p>
+            <div className="mt-3 mb-6 text-xs space-y-1 text-foreground-300">
+              <p className="flex items-center gap-2"><i className="ri-map-pin-line"></i>{location}</p>
               {/*Other details*/}
-              <p className="flex items-center gap-2 text-[oklch(.62_.012_160)]"><i className="ri-history-line"></i>Last public push {latestPush}</p>
+              <p className="flex items-center gap-2"><i className="ri-history-line"></i>Last public push {latestPush}</p>
             </div>
-            <div className="rounded-2xl border-l-4 border-[oklch(.44_.014_160)] p-4 bg-[oklch(.22_.01_160)]">
-              <p className="font-label text-xs uppercase tracking-widest text-[oklch(.62_.012_160)]">Public code signal</p>
-              <p className="mt-1 mb-3 font-heading font-bold text-2xl text-[oklch(.74_.01_160)]">{signal}</p>
+            <div className={`rounded-2xl border-l-4 ${signalBorder} p-4 bg-foreground-900`}>
+              <p className="font-label text-xs uppercase tracking-widest text-foreground-400">Public code signal</p>
+              <p className={`mt-1 mb-3 font-heading font-bold text-2xl ${signalColor}`}>{signal}</p>
               <div className="flex items-center gap-2 font-label text-xs">
-                <span className="text-[oklch(.62_.012_160)]">Confidence</span>
+                <span className="text-foreground-400">Confidence</span>
                 <div className="flex gap-1">
-                  <span className="h-1.5 w-4 rounded-full bg-report"></span>
-                  <span className={`h-1.5 w-4 rounded-full ${confidenceLength > 2 ? "bg-report" : "bg-[oklch(.37_.014_160)]"}`}></span>
-                  <span className={`h-1.5 w-4 rounded-full ${confidenceLength === 4 ? "bg-report" : "bg-[oklch(.37_.014_160)]"}`}></span>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <span className={`h-1.5 w-4 rounded-full ${pills > i ? "bg-background-50" : "bg-foreground-700"}`}></span>
+                  ))}
                 </div>
                 <span>{confidence}</span>
               </div>
             </div>
             <div className="mt-5 mb-6 grid grid-cols-2 gap-3">
               {cards.map((c, index) => (
-                <div key={index} className="bg-[oklch(.22_.01_160)] p-3 rounded-xl">
+                <div key={index} className="bg-foreground-900 p-3 rounded-xl">
                   <p className="font-heading text-xl font-bold">{c.number}</p>
-                  <p className="font-label text-xs text-[oklch(.62_.012_160)]">{c.text}</p>
+                  <p className="font-label text-xs text-foreground-400">{c.text}</p>
                 </div>
               ))}
             </div>
             <div>
-              <p className="font-label text-xs text-[oklch(.62_.012_160)]">Languages in public repos</p>
-              <div className="flex h-2 w-full overflow-hidden rounded-full bg-[oklch(.29_.012_160)] mt-2 mb-3">
+              <p className="font-label text-xs text-foreground-400">Languages in public repos</p>
+              <div className="flex h-2 w-full overflow-hidden rounded-full bg-foreground-800 mt-2 mb-3">
                 {percentages.map((p, index) => (
-                  <div key={p.language} className={LANG_COLORS[index] ? LANG_COLORS[index] : "bg-report"} style={{ width: p.percentage + "%" }}></div>
+                  <div key={p.language} className={LANG_COLORS[index] ? LANG_COLORS[index] : "bg-background-50"} style={{ width: p.percentage + "%" }}></div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 {percentages.map((p, index) => (
                   <div key={index} className="flex items-center gap-1.5">
-                    <span className={`h-2 w-2 rounded-full ${LANG_COLORS[index] ? LANG_COLORS[index] : "bg-report"}`}></span>
-                    <span className="text-xs text-[oklch(.84_.008_160)]">{p.language} {p.percentage}%</span>
+                    <span className={`h-2 w-2 rounded-full ${LANG_COLORS[index] ? LANG_COLORS[index] : "bg-background-50"}`}></span>
+                    <span className="text-xs text-foreground-200">{p.language} {p.percentage}%</span>
                   </div>
                 ))}
               </div>
             </div>
           </aside>
           <div className="space-y-6 @container">
-            <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">
+            <div className="bg-background-100 p-7 rounded-3xl border border-background-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <h3 className="text-xl">Signal & confidence</h3>
-                <p className="font-label text-xs text-[oklch(.52_.014_160)]">Banded read — not a score</p>
+                <p className="font-label text-xs text-foreground-500">Banded read — not a score</p>
               </div>
-              <div className="grid @min-[765px]:grid-cols-2 divide-y @min-[765px]:divide-y-0 @min-[765px]:divide-x divide-[oklch(.93_.016_85)] mt-5 mb-6">
+              <div className="grid @min-[765px]:grid-cols-2 divide-y @min-[765px]:divide-y-0 @min-[765px]:divide-x divide-background-200 mt-5 mb-6">
                 <Checklist
                   className="pb-6 @min-[765px]:pb-0 @min-[765px]:pr-6"
                   heading="How good is the work"
                   top={<div className="flex flex-wrap gap-1.5 my-3 text-xs font-label">
-                    <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Strong</span>
-                    <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Moderate</span>
-                    <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">Thin</span>
-                    <span className="bg-[oklch(.93_.016_85)] text-[oklch(.52_.014_160)] px-2.5 py-1 rounded-full">No public data</span>
+                    {Array.from(new Set(Object.values(SIGNAL_DATA).map(s => s.signal))).map((d, index) => (
+                      <span key={index} className={`${signal === d ? `${pill} font-semibold` : "bg-background-200 text-foreground-500"} px-2.5 py-1 rounded-full`}>{d}</span>
+                    ))}
                   </div>}
                   description={signalDescription}
                   list={signalChecklist}
@@ -165,18 +142,18 @@ export default function Report({ report }: { report: ReportData; }) {
                   top={<div className="flex items-center gap-3">
                     <span className="font-heading text-2xl font-bold my-2">{confidence}</span>
                     <div className="flex gap-1">
-                      <span className="h-2 w-6 rounded-full bg-[oklch(.29_.012_160)]"></span>
-                      <span className={`h-2 w-6 rounded-full ${confidenceLength > 2 ? "bg-[oklch(.29_.012_160)]" : "bg-[oklch(.88_.02_85)]"}`}></span>
-                      <span className={`h-2 w-6 rounded-full ${confidenceLength === 4 ? "bg-[oklch(.29_.012_160)]" : "bg-[oklch(.88_.02_85)]"}`}></span>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <span className={`h-2 w-6 rounded-full ${pills > i ? "bg-foreground-800" : "bg-[oklch(.88_.02_85)]"}`}></span>
+                      ))}
                     </div>
                   </div>}
                   description={confidenceDescription}
                   list={confidenceChecklist}
                 />
               </div>
-              <div className="rounded-2xl bg-report border border-[oklch(.93_.016_85)] p-4">
-                <p className="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-[oklch(.52_.014_160)]"><i className="ri-eye-off-line"></i>What this report cannot see</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-2 text-xs text-[oklch(.37_.014_160)]">
+              <div className="rounded-2xl bg-background-50 border border-background-200 p-4">
+                <p className="flex items-center gap-2 font-label text-xs uppercase tracking-widest text-foreground-500"><i className="ri-eye-off-line"></i>What this report cannot see</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 mt-2 text-xs text-foreground-700">
                   <p>Private and company code — most senior engineers keep their best work behind a firewall.</p>
                   <p>Work tracked outside GitHub: GitLab, Bitbucket, Gerrit, internal monorepos.</p>
                   <p>Non-code contributions: reviews, design docs, mentoring, on-call.</p>
@@ -184,45 +161,48 @@ export default function Report({ report }: { report: ReportData; }) {
                 </div>
               </div>
             </div>
-            <div className="bg-evaluate p-7 rounded-3xl border border-[oklch(.93_.016_85)]">
+            <div className="bg-background-100 p-7 rounded-3xl border border-background-200">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                 <h3 className="text-xl">What we actually found</h3>
-                <p className="font-label text-xs text-[oklch(.52_.014_160)]">Open any line to see the evidence</p>
+                <p className="font-label text-xs text-foreground-500">Open any line to see the evidence</p>
               </div>
               <article className="flex flex-col divide-y divide-[oklch(.925_.016_85)] mt-4">
-                <div>Recent public activity</div>
+                <p>Not available yet.</p>
+                {/*<div>Recent public activity</div>
                 <div>Reach of the work</div>
                 <div>How they present projects</div>
                 <div>Work in other people's code</div>
-                <div>What they reach for</div>
+                <div>What they reach for</div>*/}
               </article>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="rounded-3xl p-6 border bg-[oklch(.97_.02_155)] border-[oklch(.93_.045_155)]">
-                <h3 className="flex items-center gap-2 text-lg text-[oklch(.33_.08_155)]">
+              <div className="rounded-3xl p-6 border bg-primary-50 border-primary-100">
+                <h3 className="flex items-center gap-2 text-lg text-primary-800">
                   <i className="ri-checkbox-circle-line"></i>
                   Positive signals
                 </h3>
-                <ul></ul>
+                {/*<ul></ul>*/}
+                <p>Not available yet.</p>
               </div>
-              <div className="rounded-3xl p-6 border bg-[oklch(.97_.01_25)] border-[oklch(.93_.03_25)]">
-                <h3 className="flex items-center gap-2 text-lg text-[oklch(.36_.1_25)]">
+              <div className="rounded-3xl p-6 border bg-secondary-50 border-secondary-100">
+                <h3 className="flex items-center gap-2 text-lg text-secondary-800">
                   <i className="ri-question-line"></i>
                   Worth asking about
                 </h3>
-                <p className="text-xs text-[oklch(.52_.014_160)] mt-1">Questions for the interview — not disqualifiers.</p>
-                <ul></ul>
+                <p className="text-xs text-foreground-500 mt-1">Questions for the interview — not disqualifiers.</p>
+                {/*<ul></ul>*/}
+                <p>Not available yet.</p>
               </div>
             </div>
             <div>
               <h3 className="text-xl">Notable repositories</h3>
-              <p className="font-label text-xs text-[oklch(.52_.014_160)] mt-1 mb-4">Pinned projects are displayed first, followed by those that are popular or well-maintained.</p>
+              <p className="font-label text-xs text-foreground-500 mt-1 mb-4">Most recent projects are displayed. May be subject to change.</p>
               <article className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
                 {repos.slice(0, 6).map(r => (
-                  <a key={r.id} className="bg-[oklch(.97_.012_85)] rounded-2xl border border-[oklch(.93_.016_85)] p-5 flex flex-col">
-                    <h4 className="font-label text-sm font-semibold text-[oklch(.4_.1_155)]">{r.title}</h4>
-                    <p className="mt-2 mb-4 text-sm line-clamp-2 text-[oklch(.44_.014_160)] flex-1">{r.description}</p>
-                    <div className="flex items-center gap-4 font-label text-xs text-[oklch(.52_.014_160)]">
+                  <a key={r.id} className="group bg-background-100 rounded-2xl border border-background-200 hover:border-primary-400 p-5 flex flex-col">
+                    <h4 className="font-label text-sm font-semibold text-primary-600 group-hover:underline">{r.title}</h4>
+                    <p className="mt-2 mb-4 text-sm line-clamp-2 text-foreground-600 flex-1">{r.description}</p>
+                    <div className="flex items-center gap-4 font-label text-xs text-foreground-500">
                       <div className="flex items-center gap-1.5">
                         <span className="h-2 w-2 rounded-full bg-[oklch(.74_.16_65)]"></span>
                         <span>{Object.keys(r.languages)[0]}</span>

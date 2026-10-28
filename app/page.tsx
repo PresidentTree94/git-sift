@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { connection } from 'next/server';
 import HomeClient from "./Home";
 import { analyzeUser } from "./actions";
 
@@ -11,6 +12,7 @@ export default function Home() {
 }
 
 async function DefaultReportLoader() {
+  await connection();
   const defaultReport = await analyzeUser("presidenttree94");
   return <HomeClient defaultReport={defaultReport} />;
 }

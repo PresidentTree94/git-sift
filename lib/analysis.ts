@@ -1,4 +1,4 @@
-import { getGithubUser, getRepos, getRepoLanguages, getRepoReadMe } from "./github";
+import { getGithubUser, getRepos, getRepoLanguages, getRepoReadMe, getRepoCommits } from "./github";
 import { ReportData } from "@/types/ReportData";
 
 export async function buildReport(username: string): Promise<ReportData> {
@@ -15,6 +15,7 @@ export async function buildReport(username: string): Promise<ReportData> {
       hasReadMe: await getRepoReadMe(username, repo.name),
       stars: repo.stargazers_count,
       forks: repo.forks_count,
+      commits: await getRepoCommits(username, repo.name),
       pushed: repo.pushed_at
     }))
   );
@@ -28,6 +29,6 @@ export async function buildReport(username: string): Promise<ReportData> {
     location: user.location,
     repos: resolvedRepos,
     followers: user.followers,
-    years: new Date().getFullYear() - new Date(user.created_at).getFullYear()
+    months: new Date().getMonth() - new Date(user.created_at).getMonth()
   };
 }
