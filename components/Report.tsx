@@ -87,7 +87,7 @@ export default function Report({ report }: { report: ReportData; }) {
                 <span className="text-foreground-400">Confidence</span>
                 <div className="flex gap-1">
                   {Array.from({ length: 3 }).map((_, i) => (
-                    <span className={`h-1.5 w-4 rounded-full ${pills > i ? "bg-background-50" : "bg-foreground-700"}`}></span>
+                    <span key={i} className={`h-1.5 w-4 rounded-full ${pills > i ? "bg-background-50" : "bg-foreground-700"}`}></span>
                   ))}
                 </div>
                 <span>{confidence}</span>
@@ -143,7 +143,7 @@ export default function Report({ report }: { report: ReportData; }) {
                     <span className="font-heading text-2xl font-bold my-2">{confidence}</span>
                     <div className="flex gap-1">
                       {Array.from({ length: 3 }).map((_, i) => (
-                        <span className={`h-2 w-6 rounded-full ${pills > i ? "bg-foreground-800" : "bg-[oklch(.88_.02_85)]"}`}></span>
+                        <span key={i} className={`h-2 w-6 rounded-full ${pills > i ? "bg-foreground-800" : "bg-[oklch(.88_.02_85)]"}`}></span>
                       ))}
                     </div>
                   </div>}
