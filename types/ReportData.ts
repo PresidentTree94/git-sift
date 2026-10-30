@@ -5,11 +5,13 @@ export type ReportData = {
   url: string;
   bio: string;
   location: string;
+  company: string;
+  email: string;
+  blog: string;
   repos: {
-    id: string;
+    url: string;
     title: string;
     description: string;
-    topics: string[];
     languages: Record<string, number>;
     hasReadMe: boolean;
     stars: number;

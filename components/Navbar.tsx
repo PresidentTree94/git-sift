@@ -22,7 +22,7 @@ export default function Navbar() {
           </Link>
           <i className={`${open ? "ri-close-line" : "ri-menu-line"} text-2xl sm:hidden`} onClick={() => setOpen(!open)}></i>
         </div>
-        <nav className={`text-foreground-700 font-label text-sm gap-5 sm:gap-8 ${open ? "flex" : "hidden sm:flex"} flex-col sm:flex-row px-10 sm:px-0 py-5 sm:py-0 border-t sm:border-t-none border-background-200`}>
+        <nav className={`text-foreground-700 font-label text-sm gap-5 sm:gap-8 ${open ? "flex" : "hidden sm:flex"} flex-col sm:flex-row px-10 sm:px-0 py-5 sm:py-0 border-t sm:border-t-0 border-background-200`}>
           {nav.map((n, index) => (
             <a key={index} href={n.link} className="hover:text-primary-600" onClick={() => setOpen(false)}>{n.text}</a>
           ))}

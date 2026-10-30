@@ -12,7 +12,7 @@ export async function getGithubUser(username: string) {
 }
 
 export async function getRepos(username: string) {
-  const res = await fetch(`https://api.github.com/users/${username}/repos?sort=pushed`, { headers, next: { revalidate: 3600 } });
+  const res = await fetch(`https://api.github.com/users/${username}/repos?sort=pushed&per_page=100`, { headers, next: { revalidate: 3600 } });
   if (!res.ok) {
     throw new Error("Failed to fetch repos");
   }

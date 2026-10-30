@@ -1,7 +1,7 @@
 import Checklist from "./Checklist";
 import { ReportData } from "@/types/ReportData";
-import { SIGNAL_DATA } from "@/utils/signalData";
-import { CONFIDENCE_DATA } from "@/utils/confidenceData";
+import { getSignalData } from "@/utils/signalData";
+import { getConfidenceData } from "@/utils/confidenceData";
 
 const LANG_COLORS = ["bg-primary-400", "bg-accent-400", "bg-secondary-400", "bg-[oklch(.86_.08_155)]", "bg-accent-200", "bg-[oklch(.86_.06_25)]"];
 
@@ -9,55 +9,72 @@ function convertPush(push: string) {
   return new Date(push).toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
+type Criterion = {
+  checked: boolean;
+  title: string;
+  context: string;
+}
+
 export default function Report({ report }: { report: ReportData; }) {
 
-  const { name, username, avatar, url, bio, location, repos, followers, months } = report;
+  const { name, username, avatar, url, bio, location, company, email, blog, repos, followers, months } = report;
 
-  const latestPush = convertPush(repos[0]?.pushed);
-  const stars = repos.reduce((sum: any, repo: any) => sum + repo.stars, 0);
-  const cumulativeLanguages: Record<string, number> = {};
-  for (const repo of repos) {
-    for (const [language, bytes] of Object.entries(repo.languages)) {
-      cumulativeLanguages[language] = (cumulativeLanguages[language] || 0) + Number(bytes);
-    }
-  }
-  const totalBytes = Object.values(cumulativeLanguages).reduce((sum, bytes) => sum + bytes, 0);
-  const percentages = Object.entries(cumulativeLanguages).map(([language, bytes]) => ({ language, percentage: Math.round((bytes / totalBytes) * 100) })).filter(p => p.percentage !== 0).sort((a, b) => b.percentage - a.percentage);
+  const stats = [
+    { icon: "ri-map-pin-line", value: location },
+    { icon: "ri-building-line", value: company },
+    { icon: "ri-mail-line", value: email },
+    { icon: "ri-link", value: blog },
+    { icon: "ri-history-line", value: `Last public push ${convertPush(repos[0]?.pushed)}`}
+  ]
 
   const cards = [
-    { number: stars, text: "Stars" },
+    { number: repos.reduce((sum, r) => sum + r.stars, 0), text: "Stars" },
     { number: followers, text: "Followers" },
-    { number: repos.length, text: "Repos" },
+    { number: repos.length, text: repos.length === 100 ? "Sample repos" : "Repos" },
     { number: Math.ceil(months / 12), text: "Years" }
   ];
 
-  const signalChecklist = [
-    { checked: repos.filter(r => r.description && r.topics && r.hasReadMe).length / repos.length >= 0.75, title: "Project Standards", context: "Most projects include descriptions, READMEs, topics, etc." },
-    { checked: repos.filter(r => r.commits.length >= 7).length / repos.length >= 0.75, title: "Project Substance", context: "Most projects have at least 7 commits" },
-    { checked: repos.filter(r => r.commits.filter(c => c.commit.author.name === username).length / r.commits.length >= 0.75).length >= 0.75, title: "Repo Ownership", context: "Most projects are owned and maintained by the user" },
-    { checked: repos.filter(r => Object.keys(r.languages).length >= 3).length / repos.length >= 0.75, title: "Technical Breadth", context: "Most projects use at least 3 languages" }
-  ]
+  const cumulativeLanguages = repos.reduce((acc: Record<string, number>, repo) => {
+    for (const [lang, bytes] of Object.entries(repo.languages)) {
+      acc[lang] = (acc[lang] || 0) + Number(bytes);
+    }
+    return acc;
+  }, {});
+  
+  let processedLanguages;
+  const totalBytes = Object.values(cumulativeLanguages).reduce((a, b) => a + b, 0);
+  const percentages = Object.entries(cumulativeLanguages).map(([language, bytes]) => ({ language, bytes, percentage: Math.round((bytes / totalBytes) * 100) })).filter(p => p.percentage > 0).sort((a, b) => b.bytes - a.bytes);
+  if (percentages.length > 6) {
+    const topLanguages = percentages.slice(0, 5);
+    const otherBytes = percentages.slice(5).reduce((sum, p) => sum + p.bytes, 0);
+    processedLanguages = [...topLanguages, { language: "Other", bytes: otherBytes, percentage: 100 - topLanguages.reduce((sum, t) => sum + t.percentage, 0) }];
+  } else {
+    processedLanguages = percentages;
+  }
 
   const oneYearAgo = new Date();
   oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-  const allCommitDates: Record<string, number> = {};
-  for (const repo of repos) {
-    for (const com of repo.commits.filter(c => c.commit.author.name === username)) {
-      const date = convertPush(com.commit.author.date);
-      allCommitDates[date] = (allCommitDates[date] || 0) + 1;
-    }
-  }
+  const signalChecklist: Criterion[] = [
+    { checked: repos.filter(r => r.description && r.hasReadMe).length / repos.length >= 0.75, title: "Project Standards", context: "Most projects include descriptions, READMEs, etc." },
+    { checked: repos.filter(r => r.commits.length >= 7).length / repos.length >= 0.75, title: "Project Substance", context: "Most projects have at least 7 commits" },
+    { checked: repos.filter(r => {
+      const activityMonths: Record<string, number> = {};
+      r.commits.map(c => activityMonths[convertPush(c.commit.author.date)] = activityMonths[convertPush(c.commit.author.date)] = activityMonths[convertPush(c.commit.author.date)] + 1 || 0);
+      return Object.keys(activityMonths).length >= 2;
+    }).length / repos.length >= 0.75, title: "Development Persistence", context: "Most projects are updated beyond creation" },
+    { checked: repos.filter(r => Object.keys(r.languages).length >= 3).length / repos.length >= 0.75, title: "Technical Breadth", context: "Most projects use at least 3 languages" }
+  ]
 
-  const confidenceChecklist = [
+  const confidenceChecklist: Criterion[] = [
     { checked: repos.length >= 4, title: "Project Volume", context: "At least 4 public repositories" },
     { checked: repos.filter(r => new Date(r.pushed) > oneYearAgo).length > 0, title: "Activity Recency", context: "Repo updates within the last year" },
-    { checked: Object.keys(allCommitDates).length / months >= 0.5, title: "Activity Coverage", context: "Commits are pushed regularly since account creation" },
-    { checked: false, title: "Something", context: "Some context" }
+    { checked: repos.filter(r => r.commits.filter(c => c.commit.author.name === username).length / r.commits.length >= 0.75).length / repos.length >= 0.75, title: "Repo Ownership", context: "Most projects are owned by the user" },
+    { checked: Boolean(name && bio && location && (email || blog || company)), title: "Profile Transparency", context: "Core profile metadata is populated" }
   ];
 
-  const { signal, signalDescription, signalColor, signalBorder, pill } = SIGNAL_DATA[signalChecklist.filter(item => item.checked).length];
-  const { confidence, confidenceDescription, pills } = CONFIDENCE_DATA[confidenceChecklist.filter(item => item.checked).length];
+  const { signal, signalDescription, signalColor, signalBorder, pill } = getSignalData(signalChecklist.filter(item => item.checked).length);
+  const { confidence, confidenceDescription, pills } = getConfidenceData(confidenceChecklist.filter(item => item.checked).length);
 
   return (
     <section id="report" className="bg-background-50">
@@ -76,9 +93,9 @@ export default function Report({ report }: { report: ReportData; }) {
             </div>
             <p className="text-sm text-foreground-200">{bio}</p>
             <div className="mt-3 mb-6 text-xs space-y-1 text-foreground-300">
-              <p className="flex items-center gap-2"><i className="ri-map-pin-line"></i>{location}</p>
-              {/*Other details*/}
-              <p className="flex items-center gap-2"><i className="ri-history-line"></i>Last public push {latestPush}</p>
+              {stats.map((s, index) => (
+                s.value && <p key={index} className="flex items-center gap-2"><i className={s.icon}></i>{s.value}</p>
+              ))}
             </div>
             <div className={`rounded-2xl border-l-4 ${signalBorder} p-4 bg-foreground-900`}>
               <p className="font-label text-xs uppercase tracking-widest text-foreground-400">Public code signal</p>
@@ -104,14 +121,14 @@ export default function Report({ report }: { report: ReportData; }) {
             <div>
               <p className="font-label text-xs text-foreground-400">Languages in public repos</p>
               <div className="flex h-2 w-full overflow-hidden rounded-full bg-foreground-800 mt-2 mb-3">
-                {percentages.map((p, index) => (
-                  <div key={p.language} className={LANG_COLORS[index] ? LANG_COLORS[index] : "bg-background-50"} style={{ width: p.percentage + "%" }}></div>
+                {processedLanguages.map((p, index) => (
+                  <div key={p.language} className={LANG_COLORS[index] || "bg-background-50"} style={{ flex: p.bytes }}></div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {percentages.map((p, index) => (
+                {processedLanguages.map((p, index) => (
                   <div key={index} className="flex items-center gap-1.5">
-                    <span className={`h-2 w-2 rounded-full ${LANG_COLORS[index] ? LANG_COLORS[index] : "bg-background-50"}`}></span>
+                    <span className={`h-2 w-2 rounded-full ${LANG_COLORS[index] || "bg-background-50"}`}></span>
                     <span className="text-xs text-foreground-200">{p.language} {p.percentage}%</span>
                   </div>
                 ))}
@@ -129,7 +146,7 @@ export default function Report({ report }: { report: ReportData; }) {
                   className="pb-6 @min-[765px]:pb-0 @min-[765px]:pr-6"
                   heading="How good is the work"
                   top={<div className="flex flex-wrap gap-1.5 my-3 text-xs font-label">
-                    {Array.from(new Set(Object.values(SIGNAL_DATA).map(s => s.signal))).map((d, index) => (
+                    {["Strong", "Moderate", "Thin", "No public data"].map((d, index) => (
                       <span key={index} className={`${signal === d ? `${pill} font-semibold` : "bg-background-200 text-foreground-500"} px-2.5 py-1 rounded-full`}>{d}</span>
                     ))}
                   </div>}
@@ -199,7 +216,7 @@ export default function Report({ report }: { report: ReportData; }) {
               <p className="font-label text-xs text-foreground-500 mt-1 mb-4">Most recent projects are displayed. May be subject to change.</p>
               <article className="grid grid-cols-1 @2xl:grid-cols-2 gap-4">
                 {repos.slice(0, 6).map(r => (
-                  <a key={r.id} className="group bg-background-100 rounded-2xl border border-background-200 hover:border-primary-400 p-5 flex flex-col">
+                  <a key={r.url} href={r.url} className="group bg-background-100 rounded-2xl border border-background-200 hover:border-primary-400 p-5 flex flex-col">
                     <h4 className="font-label text-sm font-semibold text-primary-600 group-hover:underline">{r.title}</h4>
                     <p className="mt-2 mb-4 text-sm line-clamp-2 text-foreground-600 flex-1">{r.description}</p>
                     <div className="flex items-center gap-4 font-label text-xs text-foreground-500">

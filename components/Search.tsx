@@ -10,6 +10,10 @@ export default function Search({ setReport }: { setReport: React.Dispatch<React.
     const cleaned = username.replace("https://github.com/", "").trim();
     const data = await analyzeUser(cleaned);
     setReport(data);
+    const reportElement = document.getElementById("report");
+    if (reportElement) {
+      reportElement.scrollIntoView({ behavior: "smooth" });
+    }
   }
 
   return (
